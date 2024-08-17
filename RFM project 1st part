@@ -1,0 +1,87 @@
+WITH cohort_CTE AS (
+SELECT
+user_pseudo_id,
+MIN(DATE_TRUNC(PARSE_DATE('%Y%m%d', event_date), WEEK)) AS First_visit_week
+FROM
+tc-da-1.turing_data_analytics.raw_events
+GROUP BY user_pseudo_id
+HAVING First_visit_week < '2021-01-31'
+),
+
+purchase_CTE AS (
+SELECT 
+user_pseudo_id,
+DATE_TRUNC(PARSE_DATE('%Y%m%d', event_date), WEEK) AS Purchase_week,
+purchase_revenue_in_usd AS revenue
+FROM 
+tc-da-1.turing_data_analytics.raw_events
+WHERE 
+event_name = 'purchase'
+GROUP BY 
+purchase_revenue_in_usd,
+user_pseudo_id, 
+Purchase_week
+)
+
+SELECT
+cohort_CTE.First_visit_week AS Registration_week,
+ROUND(SUM(CASE 
+WHEN cohort_CTE.First_visit_week = purchase_CTE.Purchase_week THEN purchase_CTE.revenue 
+ELSE 0 
+END) / COUNT(DISTINCT cohort_CTE.user_pseudo_id),2) AS Week_0,
+ROUND(SUM(CASE 
+WHEN DATE_ADD(cohort_CTE.First_visit_week, INTERVAL 1 WEEK) = purchase_CTE.Purchase_week THEN purchase_CTE.revenue 
+ELSE 0 
+END) / COUNT(DISTINCT cohort_CTE.user_pseudo_id),2) AS Week_1,
+ROUND(SUM(CASE 
+WHEN DATE_ADD(cohort_CTE.First_visit_week, INTERVAL 2 WEEK) = purchase_CTE.Purchase_week THEN purchase_CTE.revenue 
+ELSE 0 
+END) / COUNT(DISTINCT cohort_CTE.user_pseudo_id),2) AS Week_2,
+ROUND(SUM(CASE 
+WHEN DATE_ADD(cohort_CTE.First_visit_week, INTERVAL 3 WEEK) = purchase_CTE.Purchase_week THEN purchase_CTE.revenue 
+ELSE 0 
+END) / COUNT(DISTINCT cohort_CTE.user_pseudo_id),2) AS Week_3,
+ROUND(SUM(CASE 
+WHEN DATE_ADD(cohort_CTE.First_visit_week, INTERVAL 4 WEEK) = purchase_CTE.Purchase_week THEN purchase_CTE.revenue 
+ELSE 0 
+END) / COUNT(DISTINCT cohort_CTE.user_pseudo_id),2) AS Week_4,
+ROUND(SUM(CASE 
+WHEN DATE_ADD(cohort_CTE.First_visit_week, INTERVAL 5 WEEK) = purchase_CTE.Purchase_week THEN purchase_CTE.revenue 
+ELSE 0 
+END) / COUNT(DISTINCT cohort_CTE.user_pseudo_id), 2) AS Week_5,
+ROUND(SUM(CASE 
+WHEN DATE_ADD(cohort_CTE.First_visit_week, INTERVAL 6 WEEK) = purchase_CTE.Purchase_week THEN purchase_CTE.revenue 
+ELSE 0 
+END) / COUNT(DISTINCT cohort_CTE.user_pseudo_id),2) AS Week_6,
+ROUND(SUM(CASE 
+WHEN DATE_ADD(cohort_CTE.First_visit_week, INTERVAL 7 WEEK) = purchase_CTE.Purchase_week THEN purchase_CTE.revenue 
+ELSE 0 
+END) / COUNT(DISTINCT cohort_CTE.user_pseudo_id),2) AS Week_7,
+ROUND(SUM(CASE 
+WHEN DATE_ADD(cohort_CTE.First_visit_week, INTERVAL 8 WEEK) = purchase_CTE.Purchase_week THEN purchase_CTE.revenue 
+ELSE 0 
+END) / COUNT(DISTINCT cohort_CTE.user_pseudo_id),2) AS Week_8,
+ROUND(SUM(CASE 
+WHEN DATE_ADD(cohort_CTE.First_visit_week, INTERVAL 9 WEEK) = purchase_CTE.Purchase_week THEN purchase_CTE.revenue 
+ELSE 0 
+END) / COUNT(DISTINCT cohort_CTE.user_pseudo_id),2) AS Week_9,
+ROUND(SUM(CASE 
+WHEN DATE_ADD(cohort_CTE.First_visit_week, INTERVAL 10 WEEK) = purchase_CTE.Purchase_week THEN purchase_CTE.revenue 
+ELSE 0 
+END) / COUNT(DISTINCT cohort_CTE.user_pseudo_id),2) AS Week_10,
+ROUND(SUM(CASE 
+WHEN DATE_ADD(cohort_CTE.First_visit_week, INTERVAL 11 WEEK) = purchase_CTE.Purchase_week THEN purchase_CTE.revenue 
+ELSE 0 
+END) / COUNT(DISTINCT cohort_CTE.user_pseudo_id),2) AS Week_11,
+ROUND(SUM(CASE 
+WHEN DATE_ADD(cohort_CTE.First_visit_week, INTERVAL 12 WEEK) = purchase_CTE.Purchase_week THEN purchase_CTE.revenue 
+ELSE 0 
+END) / COUNT(DISTINCT cohort_CTE.user_pseudo_id),2) AS Week_12,
+FROM 
+cohort_CTE
+LEFT JOIN 
+purchase_CTE ON cohort_CTE.user_pseudo_id = purchase_CTE.user_pseudo_id
+GROUP BY 
+Registration_week
+ORDER BY 
+Registration_week;
